@@ -10,10 +10,8 @@ import (
 	"github.com/cilium/ebpf"
 )
 
-//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -cflags "-DARM64" arm64 native/bpf.c
-////go:generate go run github.com/cilium/ebpf/cmd/bpf2go -tags "arm" -target bpfel -cflags "-DARM" arm native/bpf.c
-//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -cflags "-DI386" i386 native/bpf.c
 //go:generate go run github.com/cilium/ebpf/cmd/bpf2go -cflags "-DAMD64" amd64 native/bpf.c
+//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -cflags "-DARM64" arm64 native/bpf.c
 
 type Program struct {
 	io.Closer
@@ -45,29 +43,6 @@ func Load() (*Program, error) {
 	machine := sb.String()
 
 	switch machine {
-	case "i686", "i386":
-		{
-			spec, err := loadI386()
-			if err != nil {
-				return nil, err
-			}
-
-			for _, v := range spec.Programs {
-				v.BTF = nil
-			}
-
-			objs := &i386Objects{}
-
-			if err := spec.LoadAndAssign(objs, nil); err != nil {
-				return nil, err
-			}
-
-			program.Closer = objs
-			program.Events = objs.Events
-			program.FilpOpen = objs.KprobeFilpOpen
-			program.CreateFilename = objs.KprobeFilenameCreate
-			program.UnlinkAt = objs.KprobeUnlinkat
-		}
 	case "x86_64":
 		{
 			spec, err := loadAmd64()
