@@ -110,13 +110,13 @@ struct pt_regs {
     u64 pstate;
 };
 
-#define PT_REGS_PARM1_CORE(x) BPF_CORE_READ((x), regs[1])
-#define PT_REGS_PARM2_CORE(x) BPF_CORE_READ((x), regs[2])
-#define PT_REGS_PARM3_CORE(x) BPF_CORE_READ((x), regs[3])
-#define PT_REGS_PARM4_CORE(x) BPF_CORE_READ((x), regs[4])
-#define PT_REGS_PARM5_CORE(x) BPF_CORE_READ((x), regs[5])
-#define PT_REGS_PARM6_CORE(x) BPF_CORE_READ((x), regs[6])
-#define PT_REGS_PARM7_CORE(x) BPF_CORE_READ((x), regs[7])
+#define PT_REGS_PARM1_CORE(x) BPF_CORE_READ((x), regs[0])
+#define PT_REGS_PARM2_CORE(x) BPF_CORE_READ((x), regs[1])
+#define PT_REGS_PARM3_CORE(x) BPF_CORE_READ((x), regs[2])
+#define PT_REGS_PARM4_CORE(x) BPF_CORE_READ((x), regs[3])
+#define PT_REGS_PARM5_CORE(x) BPF_CORE_READ((x), regs[4])
+#define PT_REGS_PARM6_CORE(x) BPF_CORE_READ((x), regs[5])
+#define PT_REGS_PARM7_CORE(x) BPF_CORE_READ((x), regs[6])
 #define PT_REGS_RET_CORE(x) BPF_CORE_READ((x), regs[0])
 
 #else
