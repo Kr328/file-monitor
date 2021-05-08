@@ -4,6 +4,7 @@
 
 #define SEC(name) __attribute__((section(name),used))
 #define UINT(name, val) int(*name)[val]
+#define INLINE __attribute__((always_inline))
 
 typedef unsigned int u32;
 typedef unsigned long u64;

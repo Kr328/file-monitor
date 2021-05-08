@@ -12,6 +12,7 @@ import (
 type ResolvedEvent struct {
 	Cmdline string
 	Path    string
+	Action  bpf.Action
 	Uid     int
 	Pid     int
 }
@@ -24,7 +25,9 @@ func ResolveEvent(event *bpf.Event) *ResolvedEvent {
 	path := event.Path
 
 	if bs, err := ioutil.ReadFile(cmdlinePath); err == nil {
-		cmdline = util.ParseNulString(bs)
+		if c := util.ParseNulString(bs); c != "" {
+			cmdline = c
+		}
 	}
 
 	if path[0] != '/' {
@@ -36,6 +39,7 @@ func ResolveEvent(event *bpf.Event) *ResolvedEvent {
 	return &ResolvedEvent{
 		Cmdline: cmdline,
 		Path:    path,
+		Action:  event.Action,
 		Uid:     event.Uid,
 		Pid:     event.Pid,
 	}

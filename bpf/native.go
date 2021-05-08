@@ -18,8 +18,11 @@ import (
 
 type Program struct {
 	io.Closer
-	FilpOpen *ebpf.Program
-	Events   *ebpf.Map
+	Events *ebpf.Map
+
+	FilpOpen       *ebpf.Program
+	CreateFilename *ebpf.Program
+	UnlinkAt       *ebpf.Program
 }
 
 func Load() (*Program, error) {
@@ -51,6 +54,8 @@ func Load() (*Program, error) {
 			program.Closer = objs
 			program.Events = objs.Events
 			program.FilpOpen = objs.KprobeFilpOpen
+			program.CreateFilename = objs.KprobeFilenameCreate
+			program.UnlinkAt = objs.KprobeUnlinkat
 		}
 	case "aarch64":
 		{
@@ -72,6 +77,8 @@ func Load() (*Program, error) {
 			program.Closer = objs
 			program.Events = objs.Events
 			program.FilpOpen = objs.KprobeFilpOpen
+			program.CreateFilename = objs.KprobeFilenameCreate
+			program.UnlinkAt = objs.KprobeUnlinkat
 		}
 	default:
 		{
