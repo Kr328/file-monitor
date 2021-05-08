@@ -1,7 +1,8 @@
 .PHONY: all arm64
+all: arm64 arm amd64 i386
 
 ifndef ANDROID_NDK
-	$(error ANDROID_NDK is undefined)
+$(error ANDROID_NDK not set)
 endif
 
 BINDIR=bin/
@@ -37,8 +38,6 @@ arm64: $(BINDIR)/file-monitor-arm64
 arm: $(BINDIR)/file-monitor-arm
 amd64: $(BINDIR)/file-monitor-amd64
 i386: $(BINDIR)/file-monitor-i386
-
-all: arm64 arm amd64 i386
 
 clean:
 	rm -rf $(GENERATE_OBJECTS)
