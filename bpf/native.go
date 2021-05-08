@@ -4,9 +4,8 @@ import (
 	"errors"
 	"io"
 	"runtime"
+	"strings"
 	"syscall"
-
-	"file-monitor/util"
 
 	"github.com/cilium/ebpf"
 )
@@ -33,7 +32,42 @@ func Load() (*Program, error) {
 		return nil, err
 	}
 
-	switch util.ParseNulStringInt8(u.Machine[:]) {
+	sb := strings.Builder{}
+
+	for _, v := range u.Machine {
+		if v == 0 {
+			break
+		}
+
+		sb.WriteByte(byte(v))
+	}
+
+	machine := sb.String()
+
+	switch machine {
+	case "i686", "i386":
+		{
+			spec, err := loadI386()
+			if err != nil {
+				return nil, err
+			}
+
+			for _, v := range spec.Programs {
+				v.BTF = nil
+			}
+
+			objs := &i386Objects{}
+
+			if err := spec.LoadAndAssign(objs, nil); err != nil {
+				return nil, err
+			}
+
+			program.Closer = objs
+			program.Events = objs.Events
+			program.FilpOpen = objs.KprobeFilpOpen
+			program.CreateFilename = objs.KprobeFilenameCreate
+			program.UnlinkAt = objs.KprobeUnlinkat
+		}
 	case "x86_64":
 		{
 			spec, err := loadAmd64()

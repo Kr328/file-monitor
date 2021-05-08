@@ -24,11 +24,11 @@ func main() {
 	}
 	defer filpOpen.Close()
 
-	createFilename, err := link.Kprobe("filename_create", program.CreateFilename)
-	if err != nil {
-		panic(err.Error())
-	}
-	defer createFilename.Close()
+	//createFilename, err := link.Kprobe("filename_create", program.CreateFilename)
+	//if err != nil {
+	//	panic(err.Error())
+	//}
+	//defer createFilename.Close()
 
 	unlinkAt, err := link.Kprobe("do_unlinkat", program.UnlinkAt)
 	if err != nil {
