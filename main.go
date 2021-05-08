@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"log"
 	"os"
+	"syscall"
 
 	"file-monitor/bpf"
 
@@ -38,10 +38,19 @@ func main() {
 			return
 		}
 
-		log.Println(nulString(record.RawSample) + " open: " + nulString(record.RawSample[128:]))
-	}
-}
+		event, err := bpf.UnpackEvent(record.RawSample)
+		if err != nil {
+			log.Printf("Invalid record: %s, len = %d\n", err.Error(), len(record.RawSample))
 
-func nulString(buf []byte) string {
-	return string(buf[:bytes.IndexByte(buf, 0)])
+			continue
+		}
+
+		if event.Pid == syscall.Getpid() {
+			continue
+		}
+
+		r := ResolveEvent(event)
+
+		log.Printf("action=open pid=%d uid=%d cmdline=%s path=%s", r.Pid, r.Uid, r.Cmdline, r.Path)
+	}
 }

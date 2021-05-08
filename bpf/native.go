@@ -4,6 +4,9 @@ import (
 	"errors"
 	"io"
 	"runtime"
+	"syscall"
+
+	"file-monitor/util"
 
 	"github.com/cilium/ebpf"
 )
@@ -22,8 +25,13 @@ type Program struct {
 func Load() (*Program, error) {
 	program := &Program{}
 
-	switch runtime.GOARCH {
-	case "amd64":
+	u := syscall.Utsname{}
+	if err := syscall.Uname(&u); err != nil {
+		return nil, err
+	}
+
+	switch util.ParseNulStringInt8(u.Machine[:]) {
+	case "x86_64":
 		{
 			spec, err := loadAmd64()
 			if err != nil {
@@ -44,7 +52,7 @@ func Load() (*Program, error) {
 			program.Events = objs.Events
 			program.FilpOpen = objs.KprobeFilpOpen
 		}
-	case "arm64":
+	case "aarch64":
 		{
 			spec, err := loadArm64()
 			if err != nil {

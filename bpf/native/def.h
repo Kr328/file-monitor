@@ -7,6 +7,7 @@
 
 typedef unsigned int u32;
 typedef unsigned long u64;
+typedef unsigned char u8;
 
 #define BPF_MAP_TYPE_PERF_EVENT_ARRAY (4)
 
@@ -21,10 +22,12 @@ struct bpf_map_def {
 	unsigned int map_flags;
 };
 
-static int (*perf_event_output)(void *ctx, const void *map, u64 flags, const void *data, u64 size) = (void *)25;
-static long (*get_current_comm)(void *buf, u32 size_of_buf) = (void *) 16;
+static int (*bpf_perf_event_output)(void *ctx, const void *map, u64 flags, const void *data, u64 size) = (void *)25;
+static long (*bpf_get_current_comm)(void *buf, u32 size_of_buf) = (void *) 16;
 static long (*bpf_probe_read_kernel)(void *dst, u32 size, const void *unsafe_ptr) = (void *) 4;
 static long (*bpf_probe_read_str)(void *dst, u32 size, const void *unsafe_ptr) = (void *) 45;
+static u64 (*bpf_get_current_pid_tgid)(void) = (void *) 14;
+static u64 (*bpf_get_current_uid_gid)(void) = (void *) 15;
 
 // from asm/ptrace.h
 // from bpf/bpf_tracing.h
