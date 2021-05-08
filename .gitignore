@@ -4,3 +4,4 @@
 *_bpfel.go
 *_bpfeb.go
 /file-monitor
+/bin
