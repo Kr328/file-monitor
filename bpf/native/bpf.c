@@ -4,13 +4,19 @@ struct {
     UINT(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
 } events SEC(".maps");
 
-SEC("kprobe/openat")
-int kprobe_openat(struct pt_regs *ctx) {
-    struct pt_regs *real = (struct pt_regs *) PT_REGS_PARM1_CORE(ctx);
+struct filename {
+    const char *name;
+};
 
-    char event[128];
+SEC("kprobe/filp_open")
+int kprobe_filp_open(struct pt_regs *ctx) {
+    struct filename *filename = (struct filename *) PT_REGS_PARM2_CORE(ctx);
+    const char *name = (const char *) BPF_CORE_READ(filename, name);
 
-    get_current_comm(event, sizeof(event));
+    char event[256];
+
+    get_current_comm(event, 128);
+    bpf_probe_read_str(&event[128], 128, name);
 
     perf_event_output(ctx, &events, BPF_F_CURRENT_CPU, &event, sizeof(event));
 

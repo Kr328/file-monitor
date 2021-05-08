@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"log"
 	"os"
 
@@ -17,7 +18,7 @@ func main() {
 	}
 	defer program.Close()
 
-	openatLink, err := link.Kprobe("__x64_sys_openat", program.OpenAt)
+	openatLink, err := link.Kprobe("do_filp_open", program.FilpOpen)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -37,6 +38,10 @@ func main() {
 			return
 		}
 
-		log.Println(string(record.RawSample))
+		log.Println(nulString(record.RawSample) + " open: " + nulString(record.RawSample[128:]))
 	}
+}
+
+func nulString(buf []byte) string {
+	return string(buf[:bytes.IndexByte(buf, 0)])
 }

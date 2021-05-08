@@ -5,8 +5,8 @@
 #define SEC(name) __attribute__((section(name),used))
 #define UINT(name, val) int(*name)[val]
 
-typedef unsigned int uint32_t;
-typedef unsigned long uint64_t;
+typedef unsigned int u32;
+typedef unsigned long u64;
 
 #define BPF_MAP_TYPE_PERF_EVENT_ARRAY (4)
 
@@ -21,20 +21,10 @@ struct bpf_map_def {
 	unsigned int map_flags;
 };
 
-static int (*perf_event_output)(void *ctx, const void *map, uint64_t flags, const void *data, uint64_t size) = (void *)25;
-static long (*get_current_comm)(void *buf, uint32_t size_of_buf) = (void *) 16;
-static long (*bpf_probe_read_kernel)(void *dst, uint32_t size, const void *unsafe_ptr) = (void *) 113;
-
-struct pt_regs;
-
-// from bpf/bpf_core_read.h
-#define BPF_CORE_READ(src, a, ...)					    \
-	({								    \
-		___type((src), a, ##__VA_ARGS__) __r;			    \
-		BPF_CORE_READ_INTO(&__r, (src), a, ##__VA_ARGS__);	    \
-		__r;							    \
-	})
-
+static int (*perf_event_output)(void *ctx, const void *map, u64 flags, const void *data, u64 size) = (void *)25;
+static long (*get_current_comm)(void *buf, u32 size_of_buf) = (void *) 16;
+static long (*bpf_probe_read_kernel)(void *dst, u32 size, const void *unsafe_ptr) = (void *) 4;
+static long (*bpf_probe_read_str)(void *dst, u32 size, const void *unsafe_ptr) = (void *) 45;
 
 // from asm/ptrace.h
 // from bpf/bpf_tracing.h
@@ -75,27 +65,12 @@ struct pt_regs {
 /* top of stack page */
 };
 
-#define PT_REGS_PARM1(x) ((x)->rdi)
-#define PT_REGS_PARM2(x) ((x)->rsi)
-#define PT_REGS_PARM3(x) ((x)->rdx)
-#define PT_REGS_PARM4(x) ((x)->rcx)
-#define PT_REGS_PARM5(x) ((x)->r8)
-#define PT_REGS_RET(x) ((x)->rsp)
-#define PT_REGS_FP(x) ((x)->rbp)
-#define PT_REGS_RC(x) ((x)->rax)
-#define PT_REGS_SP(x) ((x)->rsp)
-#define PT_REGS_IP(x) ((x)->rip)
-
 #define PT_REGS_PARM1_CORE(x) BPF_CORE_READ((x), rdi)
 #define PT_REGS_PARM2_CORE(x) BPF_CORE_READ((x), rsi)
 #define PT_REGS_PARM3_CORE(x) BPF_CORE_READ((x), rdx)
 #define PT_REGS_PARM4_CORE(x) BPF_CORE_READ((x), rcx)
 #define PT_REGS_PARM5_CORE(x) BPF_CORE_READ((x), r8)
 #define PT_REGS_RET_CORE(x) BPF_CORE_READ((x), rsp)
-#define PT_REGS_FP_CORE(x) BPF_CORE_READ((x), rbp)
-#define PT_REGS_RC_CORE(x) BPF_CORE_READ((x), rax)
-#define PT_REGS_SP_CORE(x) BPF_CORE_READ((x), rsp)
-#define PT_REGS_IP_CORE(x) BPF_CORE_READ((x), rip)
 
 #elif I386
 
@@ -119,27 +94,30 @@ struct pt_regs {
 	int  xss;
 };
 
-#define PT_REGS_PARM1(x) ((x)->eax)
-#define PT_REGS_PARM2(x) ((x)->edx)
-#define PT_REGS_PARM3(x) ((x)->ecx)
-#define PT_REGS_PARM4(x) 0
-#define PT_REGS_PARM5(x) 0
-#define PT_REGS_RET(x) ((x)->esp)
-#define PT_REGS_FP(x) ((x)->ebp)
-#define PT_REGS_RC(x) ((x)->eax)
-#define PT_REGS_SP(x) ((x)->esp)
-#define PT_REGS_IP(x) ((x)->eip)
-
 #define PT_REGS_PARM1_CORE(x) BPF_CORE_READ((x), eax)
 #define PT_REGS_PARM2_CORE(x) BPF_CORE_READ((x), edx)
 #define PT_REGS_PARM3_CORE(x) BPF_CORE_READ((x), ecx)
 #define PT_REGS_PARM4_CORE(x) 0
 #define PT_REGS_PARM5_CORE(x) 0
 #define PT_REGS_RET_CORE(x) BPF_CORE_READ((x), esp)
-#define PT_REGS_FP_CORE(x) BPF_CORE_READ((x), ebp)
-#define PT_REGS_RC_CORE(x) BPF_CORE_READ((x), eax)
-#define PT_REGS_SP_CORE(x) BPF_CORE_READ((x), esp)
-#define PT_REGS_IP_CORE(x) BPF_CORE_READ((x), eip)
+
+#elif ARM64
+
+struct pt_regs {
+    u64 regs[31];
+    u64 sp;
+    u64 pc;
+    u64 pstate;
+};
+
+#define PT_REGS_PARM1_CORE(x) BPF_CORE_READ((x), regs[1])
+#define PT_REGS_PARM2_CORE(x) BPF_CORE_READ((x), regs[2])
+#define PT_REGS_PARM3_CORE(x) BPF_CORE_READ((x), regs[3])
+#define PT_REGS_PARM4_CORE(x) BPF_CORE_READ((x), regs[4])
+#define PT_REGS_PARM5_CORE(x) BPF_CORE_READ((x), regs[5])
+#define PT_REGS_PARM6_CORE(x) BPF_CORE_READ((x), regs[6])
+#define PT_REGS_PARM7_CORE(x) BPF_CORE_READ((x), regs[7])
+#define PT_REGS_RET_CORE(x) BPF_CORE_READ((x), regs[0])
 
 #else
 

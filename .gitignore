@@ -3,3 +3,4 @@
 *.o
 *_bpfel.go
 *_bpfeb.go
+/file-monitor
