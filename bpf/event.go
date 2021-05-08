@@ -11,11 +11,12 @@ import (
 type Action int
 
 type Event struct {
-	Action     Action
-	Pid        int
-	Uid        int
-	ThreadName string
-	Path       string
+	Action      Action
+	Pid         int
+	Uid         int
+	DirectoryFd int
+	ThreadName  string
+	Path        string
 }
 
 var nativeEndian binary.ByteOrder
@@ -36,11 +37,12 @@ func UnpackEvent(raw []byte) (*Event, error) {
 	}
 
 	r := &Event{
-		Action:     Action(nativeEndian.Uint32(raw[0:4])),
-		Pid:        int(nativeEndian.Uint32(raw[4:8])),
-		Uid:        int(nativeEndian.Uint32(raw[8:12])),
-		ThreadName: util.ParseNulString(raw[12:28]),
-		Path:       util.ParseNulString(raw[28:]),
+		Action:      Action(nativeEndian.Uint32(raw[0:4])),
+		Pid:         int(nativeEndian.Uint32(raw[4:8])),
+		Uid:         int(nativeEndian.Uint32(raw[8:12])),
+		DirectoryFd: int(nativeEndian.Uint32(raw[12:16])),
+		ThreadName:  util.ParseNulString(raw[16:32]),
+		Path:        util.ParseNulString(raw[32:]),
 	}
 
 	return r, nil

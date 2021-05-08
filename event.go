@@ -20,6 +20,7 @@ type ResolvedEvent struct {
 func ResolveEvent(event *bpf.Event) *ResolvedEvent {
 	cmdlinePath := fmt.Sprintf("/proc/%d/cmdline", event.Pid)
 	cwdPath := fmt.Sprintf("/proc/%d/cwd", event.Pid)
+	directoryPath := fmt.Sprintf("/proc/%d/fd/%d", event.Pid, event.DirectoryFd)
 
 	cmdline := event.ThreadName
 	path := event.Path
@@ -31,7 +32,13 @@ func ResolveEvent(event *bpf.Event) *ResolvedEvent {
 	}
 
 	if path[0] != '/' {
-		if pwd, err := os.Readlink(cwdPath); err == nil {
+		if event.DirectoryFd >= 0 {
+			if bs, err := ioutil.ReadFile(directoryPath); err == nil {
+				if c := util.ParseNulString(bs); c != "" {
+					path = c + "/" + path
+				}
+			}
+		} else if pwd, err := os.Readlink(cwdPath); err == nil {
 			path = pwd + "/" + path
 		}
 	}

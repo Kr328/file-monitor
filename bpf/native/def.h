@@ -9,6 +9,7 @@
 typedef unsigned int u32;
 typedef unsigned long u64;
 typedef unsigned char u8;
+typedef int s32;
 
 #define BPF_MAP_TYPE_PERF_EVENT_ARRAY (4)
 
