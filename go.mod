@@ -1,4 +1,4 @@
-module file-monitor
+module github/kr328/file-monitor
 
 go 1.16
 

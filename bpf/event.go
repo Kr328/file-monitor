@@ -5,7 +5,7 @@ import (
 	"io"
 	"unsafe"
 
-	"file-monitor/util"
+	"github/kr328/file-monitor/util"
 )
 
 type Event struct {

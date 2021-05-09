@@ -1,12 +1,12 @@
-package main
+package monitor
 
 import (
 	"fmt"
 	"io/ioutil"
 	"os"
 
-	"file-monitor/bpf"
-	"file-monitor/util"
+	"github/kr328/file-monitor/bpf"
+	"github/kr328/file-monitor/util"
 )
 
 type ResolvedEvent struct {

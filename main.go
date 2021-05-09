@@ -1,56 +1,40 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
-	"syscall"
+	"os/signal"
 
-	"file-monitor/bpf"
-
-	"github.com/cilium/ebpf/link"
-	"github.com/cilium/ebpf/perf"
+	"github/kr328/file-monitor/monitor"
 )
 
 func main() {
-	program, err := bpf.Load()
+	m, err := monitor.NewMonitor()
 	if err != nil {
-		panic(err.Error())
-	}
-	defer program.Close()
+		println(err.Error())
 
-	filpOpen, err := link.Kprobe("do_filp_open", program.FileOpen)
-	if err != nil {
-		panic(err.Error())
+		return
 	}
-	defer filpOpen.Close()
+	defer m.Close()
 
-	reader, err := perf.NewReader(program.Events, os.Getpagesize())
-	if err != nil {
-		panic(err.Error())
-	}
-	defer reader.Close()
+	m.Launch()
+
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt, os.Kill)
 
 	for {
-		record, err := reader.Read()
-		if err != nil {
-			println(err.Error())
+		select {
+		case e, ok := <-m.Events():
+			if ok {
+				fmt.Printf("pid=%d uid=%d cmdline=%s path=%s\n", e.Pid, e.Uid, e.Cmdline, e.Path)
+			} else {
+				println("Closed")
 
+				return
+			}
+		case <-signals:
+			println("Exiting")
 			return
 		}
-
-		event, err := bpf.UnpackEvent(record.RawSample)
-		if err != nil {
-			log.Printf("Invalid record: %s, len = %d\n", err.Error(), len(record.RawSample))
-
-			continue
-		}
-
-		if event.Pid == syscall.Getpid() {
-			continue
-		}
-
-		r := ResolveEvent(event)
-
-		log.Printf("pid=%d uid=%d cmdline=%s path=%s", r.Pid, r.Uid, r.Cmdline, r.Path)
 	}
 }
