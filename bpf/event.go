@@ -36,7 +36,7 @@ func UnpackEvent(raw []byte) (*Event, error) {
 	r := &Event{
 		Pid:         int(nativeEndian.Uint32(raw[0:4])),
 		Uid:         int(nativeEndian.Uint32(raw[4:8])),
-		DirectoryFd: int(nativeEndian.Uint32(raw[8:12])),
+		DirectoryFd: int(int32(nativeEndian.Uint32(raw[8:12]))),
 		ThreadName:  util.ParseNulString(raw[12:28]),
 		Path:        util.ParseNulString(raw[28:]),
 	}
