@@ -58,6 +58,10 @@ func Load() (*Program, error) {
 		return nil, err
 	}
 
+	for _, v := range spec.Maps {
+		v.BTF = nil
+	}
+
 	for _, v := range spec.Programs {
 		v.BTF = nil
 	}
