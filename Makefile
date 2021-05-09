@@ -5,7 +5,7 @@ ifndef ANDROID_NDK
 $(error ANDROID_NDK not set)
 endif
 
-BINDIR=bin/
+BINDIR=bin
 ANDROID_API=26
 HOST=$(shell uname -m)
 
@@ -13,7 +13,7 @@ GENERATE_OBJECTS = bpf/amd64_bpfeb.go bpf/amd64_bpfel.go bpf/amd64_bpfeb.o bpf/a
 					bpf/arm64_bpfel.go bpf/arm64_bpfeb.go bpf/arm64_bpfel.o bpf/arm64_bpfeb.o
 GENERATE_SOURCES = bpf/native/bpf.c bpf/native/def.h bpf/native/bpf_core_read.h
 
-SOURCES = main.go event.go bpf/native.go bpf/event.go
+SOURCES = main.go monitor/monitor.go monitor/event.go bpf/native.go bpf/event.go
 
 $(GENERATE_OBJECTS): $(GENERATE_SOURCES)
 	go generate bpf/native.go
