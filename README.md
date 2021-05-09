@@ -5,8 +5,20 @@ A simple cli tool to monitor the file opening of application processes.
 ### Requirement
 
 1. ebpf enabled kernel
+   ```bash
+   # zcat /proc/config.gz | grep CONFIG_BPF=y
+   CONFIG_BPF=y
+   ```
 2. kprobe enabled kernel
+   ```bash
+   # zcat /proc/config.gz | grep CONFIG_KPROBES=y
+   CONFIG_KPROBES=y
+   ```
 3. arm64/x86_64 architecture
+   ```bash
+   $ uname -m
+   aarch64 or x86_64
+   ```
 4. root required
 
 ### Usage
