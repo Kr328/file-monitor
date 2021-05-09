@@ -7,6 +7,7 @@ A simple cli tool to monitor the file opening of application processes.
 1. ebpf enabled kernel
 2. kprobe enabled kernel
 3. arm64/x86_64 architecture
+4. root required
 
 ### Usage
 
