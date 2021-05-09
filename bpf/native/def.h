@@ -2,8 +2,13 @@
 
 #include "bpf_core_read.h"
 
+#define NULL ((void*)0)
+
 #define SEC(name) __attribute__((section(name),used))
+
 #define UINT(name, val) int(*name)[val]
+#define TYPE(name, val) typeof(val) *name
+
 #define INLINE __attribute__((always_inline))
 
 typedef unsigned int u32;
@@ -12,6 +17,7 @@ typedef unsigned char u8;
 typedef int s32;
 
 #define BPF_MAP_TYPE_PERF_EVENT_ARRAY (4)
+#define BPF_MAP_TYPE_PERCPU_HASH      (5)
 
 #define BPF_F_CURRENT_CPU (0xffffffffUL)
 
@@ -24,6 +30,10 @@ struct bpf_map_def {
 	unsigned int map_flags;
 };
 
+static long (*bpf_trace_printk)(const char *fmt, u32 fmt_size, ...) = (void *) 6;
+static void *(*bpf_map_lookup_elem)(void *map, const void *key) = (void *) 1;
+static long (*bpf_map_update_elem)(void *map, const void *key, const void *value, u64 flags) = (void *) 2;
+static long (*bpf_map_delete_elem)(void *map, const void *key) = (void *) 3;
 static int (*bpf_perf_event_output)(void *ctx, const void *map, u64 flags, const void *data, u64 size) = (void *)25;
 static long (*bpf_get_current_comm)(void *buf, u32 size_of_buf) = (void *) 16;
 static long (*bpf_probe_read_kernel)(void *dst, u32 size, const void *unsafe_ptr) = (void *) 4;
@@ -75,36 +85,7 @@ struct pt_regs {
 #define PT_REGS_PARM3_CORE(x) BPF_CORE_READ((x), rdx)
 #define PT_REGS_PARM4_CORE(x) BPF_CORE_READ((x), rcx)
 #define PT_REGS_PARM5_CORE(x) BPF_CORE_READ((x), r8)
-#define PT_REGS_RET_CORE(x) BPF_CORE_READ((x), rsp)
-
-#elif I386
-
-struct pt_regs {
-	long ebx;
-	long ecx;
-	long edx;
-	long esi;
-	long edi;
-	long ebp;
-	long eax;
-	int  xds;
-	int  xes;
-	int  xfs;
-	int  xgs;
-	long orig_eax;
-	long eip;
-	int  xcs;
-	long eflags;
-	long esp;
-	int  xss;
-};
-
-#define PT_REGS_PARM1_CORE(x) BPF_CORE_READ((x), eax)
-#define PT_REGS_PARM2_CORE(x) BPF_CORE_READ((x), edx)
-#define PT_REGS_PARM3_CORE(x) BPF_CORE_READ((x), ecx)
-#define PT_REGS_PARM4_CORE(x) 0
-#define PT_REGS_PARM5_CORE(x) 0
-#define PT_REGS_RET_CORE(x) BPF_CORE_READ((x), esp)
+#define PT_REGS_RET_CORE(x) BPF_CORE_READ((x), rax)
 
 #elif ARM64
 

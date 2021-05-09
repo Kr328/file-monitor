@@ -20,6 +20,9 @@ type Program struct {
 	FilpOpen       *ebpf.Program
 	CreateFilename *ebpf.Program
 	UnlinkAt       *ebpf.Program
+
+	OpenAt      *ebpf.Program
+	RetFilename *ebpf.Program
 }
 
 func Load() (*Program, error) {
@@ -65,6 +68,9 @@ func Load() (*Program, error) {
 			program.FilpOpen = objs.KprobeFilpOpen
 			program.CreateFilename = objs.KprobeFilenameCreate
 			program.UnlinkAt = objs.KprobeUnlinkat
+
+			program.OpenAt = objs.KprobeOpenat
+			program.RetFilename = objs.KprobeReturnFilename
 		}
 	case "aarch64":
 		{

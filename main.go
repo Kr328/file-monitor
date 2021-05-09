@@ -18,11 +18,11 @@ func main() {
 	}
 	defer program.Close()
 
-	filpOpen, err := link.Kprobe("do_filp_open", program.FilpOpen)
-	if err != nil {
-		panic(err.Error())
-	}
-	defer filpOpen.Close()
+	//filpOpen, err := link.Kprobe("do_filp_open", program.FilpOpen)
+	//if err != nil {
+	//	panic(err.Error())
+	//}
+	//defer filpOpen.Close()
 
 	//createFilename, err := link.Kprobe("filename_create", program.CreateFilename)
 	//if err != nil {
@@ -30,11 +30,23 @@ func main() {
 	//}
 	//defer createFilename.Close()
 
-	unlinkAt, err := link.Kprobe("do_unlinkat", program.UnlinkAt)
+	//unlinkAt, err := link.Kprobe("do_unlinkat", program.UnlinkAt)
+	//if err != nil {
+	//	panic(err.Error())
+	//}
+	//defer unlinkAt.Close()
+
+	getFilename, err := link.Kretprobe("getname", program.RetFilename)
 	if err != nil {
 		panic(err.Error())
 	}
-	defer unlinkAt.Close()
+	defer getFilename.Close()
+
+	openAt, err := link.Kprobe("__x64_sys_openat", program.OpenAt)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer openAt.Close()
 
 	reader, err := perf.NewReader(program.Events, os.Getpagesize())
 	if err != nil {
