@@ -1,5 +1,5 @@
 .PHONY: all arm64
-all: arm64 arm amd64 i386
+all: arm64 arm amd64 i386 generate
 
 ifndef ANDROID_NDK
 $(error ANDROID_NDK not set)
@@ -34,6 +34,7 @@ $(BINDIR)/file-monitor-i386: $(SOURCES) $(GENERATE_OBJECTS)
 	mkdir -p $(BINDIR)
 	CGO_ENABLED=1 GOOS=android GOARCH=386 CC="$(ANDROID_NDK)/toolchains/llvm/prebuilt/linux-$(HOST)/bin/i686-linux-android$(ANDROID_API)-clang" go build -o $(BINDIR)/file-monitor-i386
 
+generate: $(GENERATE_OBJECTS)
 arm64: $(BINDIR)/file-monitor-arm64
 arm: $(BINDIR)/file-monitor-arm
 amd64: $(BINDIR)/file-monitor-amd64
