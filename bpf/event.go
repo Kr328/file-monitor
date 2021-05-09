@@ -8,10 +8,7 @@ import (
 	"file-monitor/util"
 )
 
-type Action int
-
 type Event struct {
-	Action      Action
 	Pid         int
 	Uid         int
 	DirectoryFd int
@@ -37,26 +34,12 @@ func UnpackEvent(raw []byte) (*Event, error) {
 	}
 
 	r := &Event{
-		Action:      Action(nativeEndian.Uint32(raw[0:4])),
-		Pid:         int(nativeEndian.Uint32(raw[4:8])),
-		Uid:         int(nativeEndian.Uint32(raw[8:12])),
-		DirectoryFd: int(nativeEndian.Uint32(raw[12:16])),
-		ThreadName:  util.ParseNulString(raw[16:32]),
-		Path:        util.ParseNulString(raw[32:]),
+		Pid:         int(nativeEndian.Uint32(raw[0:4])),
+		Uid:         int(nativeEndian.Uint32(raw[4:8])),
+		DirectoryFd: int(nativeEndian.Uint32(raw[8:12])),
+		ThreadName:  util.ParseNulString(raw[12:28]),
+		Path:        util.ParseNulString(raw[28:]),
 	}
 
 	return r, nil
-}
-
-func (a Action) String() string {
-	switch a {
-	case 1:
-		return "open"
-	case 2:
-		return "create"
-	case 3:
-		return "unlink"
-	}
-
-	return "unknown"
 }

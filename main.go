@@ -18,23 +18,11 @@ func main() {
 	}
 	defer program.Close()
 
-	filpOpen, err := link.Kprobe("do_filp_open", program.FilpOpen)
+	filpOpen, err := link.Kprobe("do_filp_open", program.FileOpen)
 	if err != nil {
 		panic(err.Error())
 	}
 	defer filpOpen.Close()
-
-	//createFilename, err := link.Kprobe("filename_create", program.CreateFilename)
-	//if err != nil {
-	//	panic(err.Error())
-	//}
-	//defer createFilename.Close()
-
-	unlinkAt, err := link.Kprobe("do_unlinkat", program.UnlinkAt)
-	if err != nil {
-		panic(err.Error())
-	}
-	defer unlinkAt.Close()
 
 	reader, err := perf.NewReader(program.Events, os.Getpagesize())
 	if err != nil {
@@ -63,6 +51,6 @@ func main() {
 
 		r := ResolveEvent(event)
 
-		log.Printf("action=%s pid=%d uid=%d cmdline=%s path=%s", r.Action.String(), r.Pid, r.Uid, r.Cmdline, r.Path)
+		log.Printf("pid=%d uid=%d cmdline=%s path=%s", r.Pid, r.Uid, r.Cmdline, r.Path)
 	}
 }
