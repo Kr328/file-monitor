@@ -38,3 +38,10 @@ for {
 
 1. Install `make`, `clang`, `Android NDK`
 2. `ANDROID_NDK=/path/to/android-ndk make all`
+
+### Notice
+
+##### 3rd party licenses
+
+1. **bpf_core_read.h**
+   LGPL-2.1 OR BSD-2-Clause
