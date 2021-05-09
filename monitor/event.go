@@ -32,10 +32,8 @@ func ResolveEvent(event *bpf.Event) *ResolvedEvent {
 
 	if path[0] != '/' {
 		if event.DirectoryFd >= 0 {
-			if bs, err := ioutil.ReadFile(directoryPath); err == nil {
-				if c := util.ParseNulString(bs); c != "" {
-					path = c + "/" + path
-				}
+			if d, err := os.Readlink(directoryPath); err == nil {
+				path = d + "/" + path
 			}
 		} else if pwd, err := os.Readlink(cwdPath); err == nil {
 			path = pwd + "/" + path
