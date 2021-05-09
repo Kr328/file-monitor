@@ -2,10 +2,8 @@ package bpf
 
 import (
 	"errors"
-	"io"
-	"runtime"
-	"strings"
-	"syscall"
+
+	"file-monitor/util"
 
 	"github.com/cilium/ebpf"
 )
@@ -14,92 +12,59 @@ import (
 //go:generate go run github.com/cilium/ebpf/cmd/bpf2go -cflags "-DARM64" arm64 native/bpf.c
 
 type Program struct {
-	io.Closer
-	Events *ebpf.Map
+	Events *ebpf.Map `ebpf:"events"`
 
-	FilpOpen       *ebpf.Program
-	CreateFilename *ebpf.Program
-	UnlinkAt       *ebpf.Program
+	Open     *ebpf.Program `ebpf:"kprobe_open"`
+	OpenAt   *ebpf.Program `ebpf:"kprobe_openat"`
+	OpenAt2  *ebpf.Program `ebpf:"kprobe_openat2"`
+	Mkdir    *ebpf.Program `ebpf:"kprobe_mkdir"`
+	MkdirAt  *ebpf.Program `ebpf:"kprobe_mkdirat"`
+	Unlink   *ebpf.Program `ebpf:"kprobe_unlink"`
+	UnlinkAt *ebpf.Program `ebpf:"kprobe_unlinkat"`
 
-	OpenAt      *ebpf.Program
-	RetFilename *ebpf.Program
+	ReturnFilename *ebpf.Program `ebpf:"kprobe_return_filename"`
 }
 
 func Load() (*Program, error) {
-	program := &Program{}
+	program := Program{}
 
-	u := syscall.Utsname{}
-	if err := syscall.Uname(&u); err != nil {
-		return nil, err
-	}
+	machine := util.ResolveMachineArch()
 
-	sb := strings.Builder{}
-
-	for _, v := range u.Machine {
-		if v == 0 {
-			break
-		}
-
-		sb.WriteByte(byte(v))
-	}
-
-	machine := sb.String()
+	var spec *ebpf.CollectionSpec
+	var err error
 
 	switch machine {
 	case "x86_64":
-		{
-			spec, err := loadAmd64()
-			if err != nil {
-				return nil, err
-			}
-
-			for _, v := range spec.Programs {
-				v.BTF = nil
-			}
-
-			objs := &amd64Objects{}
-
-			if err := spec.LoadAndAssign(objs, nil); err != nil {
-				return nil, err
-			}
-
-			program.Closer = objs
-			program.Events = objs.Events
-			program.FilpOpen = objs.KprobeFilpOpen
-			program.CreateFilename = objs.KprobeFilenameCreate
-			program.UnlinkAt = objs.KprobeUnlinkat
-
-			program.OpenAt = objs.KprobeOpenat
-			program.RetFilename = objs.KprobeReturnFilename
-		}
+		spec, err = loadAmd64()
 	case "aarch64":
-		{
-			spec, err := loadArm64()
-			if err != nil {
-				return nil, err
-			}
-
-			for _, v := range spec.Programs {
-				v.BTF = nil
-			}
-
-			objs := &arm64Objects{}
-
-			if err := spec.LoadAndAssign(objs, nil); err != nil {
-				return nil, err
-			}
-
-			program.Closer = objs
-			program.Events = objs.Events
-			program.FilpOpen = objs.KprobeFilpOpen
-			program.CreateFilename = objs.KprobeFilenameCreate
-			program.UnlinkAt = objs.KprobeUnlinkat
-		}
+		spec, err = loadArm64()
 	default:
-		{
-			return nil, errors.New("unsupported platform " + runtime.GOARCH)
-		}
+		err = errors.New("unsupported platform: " + machine)
+	}
+	if err != nil {
+		return nil, err
 	}
 
-	return program, nil
+	for _, v := range spec.Programs {
+		v.BTF = nil
+	}
+
+	if err := spec.LoadAndAssign(&program, nil); err != nil {
+		return nil, err
+	}
+
+	return &program, nil
+}
+
+func (p *Program) Close() error {
+	p.Events.Close()
+	p.Open.Close()
+	p.OpenAt.Close()
+	p.OpenAt2.Close()
+	p.Mkdir.Close()
+	p.MkdirAt.Close()
+	p.Unlink.Close()
+	p.UnlinkAt.Close()
+
+	return nil
 }

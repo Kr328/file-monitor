@@ -3,6 +3,7 @@ package bpf
 import (
 	"encoding/binary"
 	"io"
+	"strconv"
 	"unsafe"
 
 	"file-monitor/util"
@@ -53,10 +54,10 @@ func (a Action) String() string {
 	case 1:
 		return "open"
 	case 2:
-		return "create"
+		return "mkdir"
 	case 3:
 		return "unlink"
 	}
 
-	return "unknown"
+	return strconv.Itoa(int(a))
 }

@@ -16,6 +16,7 @@ typedef unsigned long u64;
 typedef unsigned char u8;
 typedef int s32;
 
+#define BPF_MAP_TYPE_HASH             (1)
 #define BPF_MAP_TYPE_PERF_EVENT_ARRAY (4)
 #define BPF_MAP_TYPE_PERCPU_HASH      (5)
 
@@ -40,6 +41,8 @@ static long (*bpf_probe_read_kernel)(void *dst, u32 size, const void *unsafe_ptr
 static long (*bpf_probe_read_str)(void *dst, u32 size, const void *unsafe_ptr) = (void *) 45;
 static u64 (*bpf_get_current_pid_tgid)(void) = (void *) 14;
 static u64 (*bpf_get_current_uid_gid)(void) = (void *) 15;
+static u32 (*bpf_get_smp_processor_id)(void) = (void *) 8;
+static u64 (*bpf_get_current_task)(void) = (void *) 35;
 
 // from asm/ptrace.h
 // from bpf/bpf_tracing.h

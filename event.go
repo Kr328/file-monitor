@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"file-monitor/bpf"
@@ -25,7 +24,7 @@ func ResolveEvent(event *bpf.Event) *ResolvedEvent {
 	cmdline := event.ThreadName
 	path := event.Path
 
-	if bs, err := ioutil.ReadFile(cmdlinePath); err == nil {
+	if bs, err := os.ReadFile(cmdlinePath); err == nil {
 		if c := util.ParseNulString(bs); c != "" {
 			cmdline = c
 		}
@@ -33,7 +32,7 @@ func ResolveEvent(event *bpf.Event) *ResolvedEvent {
 
 	if path[0] != '/' {
 		if event.DirectoryFd >= 0 {
-			if bs, err := ioutil.ReadFile(directoryPath); err == nil {
+			if bs, err := os.ReadFile(directoryPath); err == nil {
 				if c := util.ParseNulString(bs); c != "" {
 					path = c + "/" + path
 				}
