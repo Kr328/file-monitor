@@ -2,11 +2,11 @@ package monitor
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 
+	"golang.org/x/sys/unix"
+
 	"github/kr328/file-monitor/bpf"
-	"github/kr328/file-monitor/util"
 )
 
 type ResolvedEvent struct {
@@ -24,8 +24,8 @@ func ResolveEvent(event *bpf.Event) *ResolvedEvent {
 	cmdline := event.ThreadName
 	path := event.Path
 
-	if bs, err := ioutil.ReadFile(cmdlinePath); err == nil {
-		if c := util.ParseNulString(bs); c != "" {
+	if bs, err := os.ReadFile(cmdlinePath); err == nil {
+		if c := unix.ByteSliceToString(bs); c != "" {
 			cmdline = c
 		}
 	}

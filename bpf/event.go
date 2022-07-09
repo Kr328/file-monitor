@@ -5,7 +5,7 @@ import (
 	"io"
 	"unsafe"
 
-	"github/kr328/file-monitor/util"
+	"golang.org/x/sys/unix"
 )
 
 type Event struct {
@@ -37,8 +37,8 @@ func UnpackEvent(raw []byte) (*Event, error) {
 		Pid:         int(nativeEndian.Uint32(raw[0:4])),
 		Uid:         int(nativeEndian.Uint32(raw[4:8])),
 		DirectoryFd: int(int32(nativeEndian.Uint32(raw[8:12]))),
-		ThreadName:  util.ParseNulString(raw[12:28]),
-		Path:        util.ParseNulString(raw[28:]),
+		ThreadName:  unix.ByteSliceToString(raw[12:28]),
+		Path:        unix.ByteSliceToString(raw[28:]),
 	}
 
 	return r, nil

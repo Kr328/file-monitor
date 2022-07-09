@@ -3,7 +3,8 @@ package monitor
 import (
 	"os"
 	"sync"
-	"syscall"
+
+	"golang.org/x/sys/unix"
 
 	"github/kr328/file-monitor/bpf"
 
@@ -41,7 +42,7 @@ func (m *Monitor) Launch() {
 					continue
 				}
 
-				if event.Pid == syscall.Getpid() {
+				if event.Pid == unix.Getpid() {
 					continue
 				}
 
@@ -63,7 +64,7 @@ func NewMonitor() (*Monitor, error) {
 		return nil, err
 	}
 
-	filpOpen, err := link.Kprobe("do_filp_open", program.FileOpen)
+	filpOpen, err := link.Kprobe("do_filp_open", program.FileOpen, nil)
 	if err != nil {
 		return nil, err
 	}
