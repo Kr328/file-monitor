@@ -22,7 +22,13 @@ struct event_msg {
 
 INLINE
 void write_event(void *ctx, s32 dfd, const char *name, u32 action) {
-    struct event_msg event;
+    struct event_msg event = {
+        .pid = 0,
+        .uid = 0,
+        .dfd = -1,
+        .thread_name = {0},
+        .path = {0}
+    };
 
     if (bpf_probe_read_str(&event.path, sizeof(event.path), name) < 0)
         return;
